@@ -1,0 +1,38 @@
+---
+- name: This sets up an httpd webserver
+  hosts: node1.example.com
+  tasks:
+  - name: install apache centOS
+    yum:
+      name: httpd
+      state: present
+    when: (ansible_distribution == "CentOS")
+  
+  - name: install apache debian like
+    apt:
+      name: httpd
+      state: present
+    when: (ansible_distribution == "Debian")
+
+
+  - name: start service systemd
+    service:
+      name: httpd 
+      state: started
+
+  - name: add some information on index.html
+    lineinfile:
+      path: /var/www/html/index.html 
+      line: Welcome to my web server
+      create: yes
+
+  - name: firewalld open_ports
+    firewalld:
+      service: http
+      permanent: true
+      state: enabled
+
+  - name: Apply firewalld rules
+    service: 
+      name: firewalld 
+      state: restarted

@@ -1,0 +1,16 @@
+---
+- name: This sets up an httpd webserver
+  hosts: node1.example.com
+  tasks:
+  - name: Check 
+    shell: grep GRUB_CMDLINE_LINUX_DEFAULT /etc/default/grub | grep -c "net.ifnames=0 biosdevname=0"
+    register: cgroup_status
+    ignore_errors: true
+
+  - name: change if needed
+    lineinfile: dest="/etc/default/grub" regexp='GRUB_CMDLINE_LINUX="(.*)"' line='GRUB_CMDLINE_LINUX="\1 net.ifnames=0 biosdevname=0"' backrefs=yes
+    when: cgroup_status.stdout == "0"
+
+  - name: update
+    shell: grub2-mkconfig -o /boot/grub2/grub.cfg
+    when: cgroup_status.stdout == "0"

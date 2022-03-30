@@ -1,0 +1,33 @@
+---
+- name: This sets up an httpd webserver
+  hosts: node1.example.com
+  tasks:
+  - name: remove apache centOS
+    yum:
+      name: httpd
+      state: absent
+    when: (ansible_distribution == "CentOS")
+  
+  - name: remove apache debian like
+    apt:
+      name: httpd
+      state: absent
+    when: (ansible_distribution == "Debian")
+
+  - name: Remove file (delete file)
+    file:
+      path: /var/www/html/index.html;
+      state: absent
+
+  - name: firewalld closed ports
+    firewalld:
+      service: http
+      permanent: true
+      state: disabled
+    when: (ansible_distribution == "CentOS")
+
+  - name: Apply firewalld rules
+    service: 
+      name: firewalld 
+      state: restarted
+    when: (ansible_distribution == "CentOS")
